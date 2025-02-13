@@ -148,13 +148,18 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 	const char WhiteKing  = '☻';
 	const char Vacant     = '·';
 
+	//Makes the console cursor invisible to avoid disrupting the display
 	Console.CursorVisible = false;
+	//Resets the cursor to the top-left corner to redraw the board from the beginning
 	Console.SetCursorPosition(0, 0);
-	StringBuilder sb = new();
+	StringBuilder sb = new();//build multi-line strings, minimizing console operations
+
+	//Outputs the Checkers title and top border of the board
 	sb.AppendLine();
 	sb.AppendLine("  Checkers");
 	sb.AppendLine();
 	sb.AppendLine($"    ╔═══════════════════╗");
+	//Renders each row of the board from row 8 to row 1. Uses B(x, y) to get the piece character for each cell
 	sb.AppendLine($"  8 ║  {B(0, 7)} {B(1, 7)} {B(2, 7)} {B(3, 7)} {B(4, 7)} {B(5, 7)} {B(6, 7)} {B(7, 7)}  ║ {BlackPiece} = Black");
 	sb.AppendLine($"  7 ║  {B(0, 6)} {B(1, 6)} {B(2, 6)} {B(3, 6)} {B(4, 6)} {B(5, 6)} {B(6, 6)} {B(7, 6)}  ║ {BlackKing} = Black King");
 	sb.AppendLine($"  6 ║  {B(0, 5)} {B(1, 5)} {B(2, 5)} {B(3, 5)} {B(4, 5)} {B(5, 5)} {B(6, 5)} {B(7, 5)}  ║ {WhitePiece} = White");
@@ -166,6 +171,8 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 	sb.AppendLine($"    ╚═══════════════════╝");
 	sb.AppendLine($"       A B C D E F G H");
 	sb.AppendLine();
+
+	//check if a selection exists, highlights the selected position with a special character.
 	if (selection is not null)
 	{
 		sb.Replace(" $ ", $"[{ToChar(game.Board[selection.Value.X, selection.Value.Y])}]");
@@ -180,19 +187,18 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 	PieceColor? wc = game.Winner;
 	PieceColor? mc = playerMoved?.Color;
 	PieceColor? tc = game.Turn;
-	// Note: these strings need to match in length
-	// so they overwrite each other.
-	string w = $"  *** {wc} wins ***";
-	string m = $"  {mc} moved       ";
-	string t = $"  {tc}'s turn      ";
+	
+	string w = $"  *** {wc} wins ***";//Builds the winner information string to display when the game ends
+	string m = $"  {mc} moved       ";//Builds a message indicating which player moved last
+	string t = $"  {tc}'s turn      ";//Builds a message indicating whose turn it is
 	sb.AppendLine(
-		game.Winner is not null ? w :
-		playerMoved is not null ? m :
-		t);
-	string p = "  Press any key to continue...";
-	string s = "                              ";
+		game.Winner is not null ? w ://Outputs the winner message if the game is over.
+		playerMoved is not null ? m ://Outputs the last player who moved
+		t);//Otherwise, it shows whose turn it is
+	string p = "  Press any key to continue...";//Prompt message asking the user to press any key
+	string s = "                              ";//Empty string to maintain consistent output format
 	sb.AppendLine(promptPressKey ? p : s);
-	Console.Write(sb);
+	Console.Write(sb);//Writes the constructed string sb to the console to render the board and messages
 
 	char B(int x, int y) =>
 		(x, y) == selection ? '$' :
@@ -200,7 +206,7 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 		ToChar(game.Board[x, y]);
 
 	static char ToChar(Piece? piece) =>
-		piece is null ? Vacant :
+		piece is null ? Vacant ://Returns Vacant for an empty square
 		(piece.Color, piece.Promoted) switch
 		{
 			(Black, false) => BlackPiece,
