@@ -1,5 +1,7 @@
 ﻿namespace Checkers;
 
+
+
 public class Board
 {
 	public List<Piece> Pieces { get; }//read-only, stores all pieces currently on the board
