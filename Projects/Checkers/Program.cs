@@ -73,32 +73,41 @@ Game ShowIntroScreenAndGetOption()
 	return new Game(humanPlayerCount.Value);
 }
 
+//runs until a player wins and not null
 void RunGameLoop(Game game)
 {
-	while (game.Winner is null)
+	while (game.Winner is null)//keeps the game running until a player wins
 	{
+		//get current player's turn
+		//switch to the current player
 		Player currentPlayer = game.Players.First(player => player.Color == game.Turn);
-		if (currentPlayer.IsHuman)
+		if (currentPlayer.IsHuman)//if human, execute the logic for a human turn
 		{
 			while (game.Turn == currentPlayer.Color)
 			{
 				(int X, int Y)? selectionStart = null;
+				//if aggressor, sets from to its position
 				(int X, int Y)? from = game.Board.Aggressor is not null ? (game.Board.Aggressor.X, game.Board.Aggressor.Y) : null;
+				//Retrieves all possible moves for the current player to validate user input
 				List<Move> moves = game.Board.GetPossibleMoves(game.Turn);
+				//check if only one piece can move, auto-select it to simplify user input
 				if (moves.Select(move => move.PieceToMove).Distinct().Count() is 1)
 				{
 					Move must = moves.First();
 					from = (must.PieceToMove.X, must.PieceToMove.Y);
 					selectionStart = must.To;
 				}
+				//Calls HumanMoveSelection to let the user select a start position
 				while (from is null)
 				{
 					from = HumanMoveSelection(game);
 					selectionStart = from;
 				}
+				//Allows the user to select a target position
 				(int X, int Y)? to = HumanMoveSelection(game, selectionStart: selectionStart, from: from);
 				Piece? piece = null;
 				piece = game.Board[from.Value.X, from.Value.Y];
+				//Checks if there is a piece at the start position and its color matches the current turn
 				if (piece is null || piece.Color != game.Turn)
 				{
 					from = null;
@@ -106,6 +115,7 @@ void RunGameLoop(Game game)
 				}
 				if (from is not null && to is not null)
 				{
+					//Validates the move and performs it if it's valid
 					Move? move = game.Board.ValidateMove(game.Turn, from.Value, to.Value);
 					if (move is not null &&
 						(game.Board.Aggressor is null || move.PieceToMove == game.Board.Aggressor))
@@ -115,21 +125,22 @@ void RunGameLoop(Game game)
 				}
 			}
 		}
+		//handle CPU turn
 		else
 		{
 			List<Move> moves = game.Board.GetPossibleMoves(game.Turn);
 			List<Move> captures = moves.Where(move => move.PieceToCapture is not null).ToList();
-			if (captures.Count > 0)
+			if (captures.Count > 0)//Prioritizes capturing moves
 			{
 				game.PerformMove(captures[Random.Shared.Next(captures.Count)]);
 			}
-			else if(!game.Board.Pieces.Any(piece => piece.Color == game.Turn && !piece.Promoted))
+			else if(!game.Board.Pieces.Any(piece => piece.Color == game.Turn && !piece.Promoted))//moves towards the closest rival
 			{
 				var (a, b) = game.Board.GetClosestRivalPieces(game.Turn);
 				Move? priorityMove = moves.FirstOrDefault(move => move.PieceToMove == a && Board.IsTowards(move, b));
 				game.PerformMove(priorityMove ?? moves[Random.Shared.Next(moves.Count)]);
 			}
-			else
+			else//or just selects a random move
 			{
 				game.PerformMove(moves[Random.Shared.Next(moves.Count)]);
 			}
