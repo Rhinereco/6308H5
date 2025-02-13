@@ -1,16 +1,20 @@
 ﻿Exception? exception = null;
+//Declares an exception object (can be null) to store error information when an exception is caught
 
 Encoding encoding = Console.OutputEncoding;
+//Saves the current console output encoding to restore it in the finally block
 
 try
 {
 	Console.OutputEncoding = Encoding.UTF8;
 	Game game = ShowIntroScreenAndGetOption();
+	//Calls a method to display the game introduction screen and get the user-defined game mode
 	Console.Clear();
-	RunGameLoop(game);
-	RenderGameState(game, promptPressKey: true);
-	Console.ReadKey(true);
+	RunGameLoop(game);//Starts the main game loop
+	RenderGameState(game, promptPressKey: true);//Renders the current game state to the console
+	Console.ReadKey(true);//revent the program from exiting
 }
+//Catches the exception, stores it in the exception object
 catch (Exception e)
 {
 	exception = e;
@@ -24,6 +28,7 @@ finally
 	Console.WriteLine(exception?.ToString() ?? "Checkers was closed.");
 }
 
+//display the game introduction and get the user's game mode selection
 Game ShowIntroScreenAndGetOption()
 {
 	Console.Clear();
@@ -206,10 +211,10 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 
 (int X, int Y)? HumanMoveSelection(Game game, (int X, int y)? selectionStart = null, (int X, int Y)? from = null)
 {
-	(int X, int Y) selection = selectionStart ?? (3, 3);
+	(int X, int Y) selection = selectionStart ?? (3, 3);//initial position
 	while (true)
 	{
-		RenderGameState(game, selection: selection, from: from);
+		RenderGameState(game, selection: selection, from: from);// from means beginning position
 		switch (Console.ReadKey(true).Key)
 		{
 			case ConsoleKey.DownArrow:  selection.Y = Math.Max(0, selection.Y - 1); break;
