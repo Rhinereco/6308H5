@@ -57,7 +57,9 @@ Game ShowIntroScreenAndGetOption()
 	Console.WriteLine("    [1] Black (human) vs White (computer)");
 	Console.Write("    [2] Black (human) vs White (human)");
 
+    //store the number of human players selected by the user
 	int? humanPlayerCount = null;
+	//keep looping until user entering a valid game mode
 	while (humanPlayerCount is null)
 	{
 		Console.CursorVisible = false;
