@@ -4,9 +4,9 @@ public class Game
 {
 	private const int PiecesPerColor = 12;
 
-	public PieceColor Turn { get; private set; }
+	public PieceColor Turn { get; set; }
 	public Board Board { get; }
-	public PieceColor? Winner { get; private set; }
+	public PieceColor? Winner { get; set; }//remove the private here, or cannot directly change the color
 	public List<Player> Players { get; }
 
 	public Game(int humanPlayerCount)

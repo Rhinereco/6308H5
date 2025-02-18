@@ -1,6 +1,10 @@
-﻿Exception? exception = null;
-//Declares an exception object (can be null) to store error information when an exception is caught
+﻿//RequirementA-4: Pieces can move in all 8 directions
+//RequirementB-4: Stamina System
 
+using System.Threading;
+
+Exception? exception = null;
+//Declares an exception object (can be null) to store error information when an exception is caught
 Encoding encoding = Console.OutputEncoding;
 //Saves the current console output encoding to restore it in the finally block
 
@@ -85,6 +89,16 @@ void RunGameLoop(Game game)
 		{
 			while (game.Turn == currentPlayer.Color)
 			{
+				//========================================B-4:StaminaSystem====================================
+				//when stamina is depleted, switch to the next player
+				if(currentPlayer.step_count <= 0)
+				{
+					//If the player is black, switch to white; otherwise, switch to black.
+					game.Turn = currentPlayer.Color == PieceColor.Black ? PieceColor.White : PieceColor.Black;
+					currentPlayer.step_count++;//as compensation, the next turn can take an action.s
+					continue;
+				}
+				//=============================================================================================
 				(int X, int Y)? selectionStart = null;
 				//if aggressor, sets from to its position
 				(int X, int Y)? from = game.Board.Aggressor is not null ? (game.Board.Aggressor.X, game.Board.Aggressor.Y) : null;
@@ -198,7 +212,8 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 	PieceColor? wc = game.Winner;
 	PieceColor? mc = playerMoved?.Color;
 	PieceColor? tc = game.Turn;
-	
+	// Note: these strings need to match in length
+	// so they overwrite each other.
 	string w = $"  *** {wc} wins ***";//Builds the winner information string to display when the game ends
 	string m = $"  {mc} moved       ";//Builds a message indicating which player moved last
 	string t = $"  {tc}'s turn      ";//Builds a message indicating whose turn it is
