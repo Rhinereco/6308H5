@@ -10,7 +10,6 @@ namespace WarCardGame
             // initialize suits and values
             string[] suits = { "Hearts", "Clubs", "Spades", "Diamonds" };
             int[] values = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }; // 2 to A
-
             List<(int value, string suit)> deck = new List<(int, string)>();
             foreach (var suit in suits)
             {
@@ -77,7 +76,7 @@ namespace WarCardGame
                 12 => "Q",
                 13 => "K",
                 14 => "A",
-                _ => value.ToString()
+                _ => value.ToString()//directly convert other int values to string
             };
         }
         static void Shuffle<T>(List<T> list)// shuffle
