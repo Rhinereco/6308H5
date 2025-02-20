@@ -3,13 +3,16 @@
 public class Game
 {
 	private const int PiecesPerColor = 12;
+	
 
 	public PieceColor Turn { get; set; }
 	public Board Board { get; }
 	public PieceColor? Winner { get; set; }//remove the private here, or cannot directly change the color
 	public List<Player> Players { get; }
 
-	public Game(int humanPlayerCount)
+	private Action<Game> renderCallback;
+
+	public Game(int humanPlayerCount, Action<Game> renderCallback)
 	{
 		if (humanPlayerCount < 0 || 2 < humanPlayerCount) throw new ArgumentOutOfRangeException(nameof(humanPlayerCount));
 		Board = new Board();
@@ -20,6 +23,9 @@ public class Game
 		};
 		Turn = Black;
 		Winner = null;
+
+		// store the passed rendering method
+		this.renderCallback = renderCallback;
 	}
 
 	public void PerformMove(Move move)
@@ -44,6 +50,16 @@ public class Game
 			Board.Aggressor = null;
 			Turn = Turn is Black ? White : Black;
 		}
+
+		// get the current player and reduced the Stamina
+		Player currentPlayer = Players.First(p => p.Color == move.PieceToMove.Color);
+		currentPlayer.step_count = 0; // after move turn Stamina to 0 immediately
+
+		// call the render method
+		renderCallback(this);
+
+		Console.ReadKey(true); // wait for player pressing Enter
+
 		CheckForWinner();
 	}
 

@@ -74,8 +74,17 @@ Game ShowIntroScreenAndGetOption()
 			case ConsoleKey.D2 or ConsoleKey.NumPad2: humanPlayerCount = 2; break;
 		}
 	}
-	return new Game(humanPlayerCount.Value);
+	return new Game(humanPlayerCount.Value, RenderGameStateWrapper);
 }
+
+// signature of the RenderGameState method is incompatible with Action<Game> 
+// RenderGameState expects multiple parameters
+// whereas Action<Game> requires a single parameter of type Game
+void RenderGameStateWrapper(Game game)
+{
+    RenderGameState(game, playerMoved: null, promptPressKey: false);
+}
+
 
 //runs until a player wins and not null
 void RunGameLoop(Game game)
@@ -85,6 +94,10 @@ void RunGameLoop(Game game)
 		//get current player's turn
 		//switch to the current player
 		Player currentPlayer = game.Players.First(player => player.Color == game.Turn);
+
+		//Ensure that Stamina is restored to 1 at the beginning of each player's turn
+		currentPlayer.step_count = 1;
+
 		if (currentPlayer.IsHuman)//if human, execute the logic for a human turn
 		{
 			while (game.Turn == currentPlayer.Color)
@@ -95,7 +108,7 @@ void RunGameLoop(Game game)
 				{
 					//If the player is black, switch to white; otherwise, switch to black.
 					game.Turn = currentPlayer.Color == PieceColor.Black ? PieceColor.White : PieceColor.Black;
-					currentPlayer.step_count++;//as compensation, the next turn can take an action.s
+					//currentPlayer.step_count++;
 					continue;
 				}
 				//=============================================================================================
@@ -213,7 +226,6 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 	PieceColor? mc = playerMoved?.Color;
 	PieceColor? tc = game.Turn;
 	// Note: these strings need to match in length
-	// so they overwrite each other.
 	string w = $"  *** {wc} wins ***";//Builds the winner information string to display when the game ends
 	string m = $"  {mc} moved       ";//Builds a message indicating which player moved last
 	string t = $"  {tc}'s turn      ";//Builds a message indicating whose turn it is
@@ -221,6 +233,11 @@ void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? sele
 		game.Winner is not null ? w ://Outputs the winner message if the game is over.
 		playerMoved is not null ? m ://Outputs the last player who moved
 		t);//Otherwise, it shows whose turn it is
+
+	Player currentPlayer = game.Players.First(player => player.Color == game.Turn); // get the current player
+	string stamina = $"  Stamina: {currentPlayer.step_count}       "; // show current player's stamina
+	sb.AppendLine(stamina); // add stamina information to the UI
+
 	string p = "  Press any key to continue...";//Prompt message asking the user to press any key
 	string s = "                              ";//Empty string to maintain consistent output format
 	sb.AppendLine(promptPressKey ? p : s);

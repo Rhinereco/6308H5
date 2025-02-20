@@ -121,8 +121,7 @@ public class Board
 	}
 
     //make the players can move to all eight directions
-	//原理是检查玩家所有可以移动的方向是否符合一个规则
-	//check if all move directions for player fit with 1 rule
+	//check whether all possible movement directions for the player conform to a specific rule
 	public List<Move> GetPossibleMoves(Piece piece)
 	{
 		List<Move> moves = new();
@@ -143,7 +142,8 @@ public class Board
 		{
 			// if (!piece.Promoted && piece.Color is Black && dy is -1) return;
 			// if (!piece.Promoted && piece.Color is White && dy is 1) return;
-			//根据颜色不同来决定这个方向是否符合要求，这里这就直接变成只要不是原点都可以移动
+			// determine whether the direction is valid based on the piece's color
+			// it simplifies to allowing movement in any direction as long as it is not the origin
 			if (!piece.Promoted && piece.Color is Black && dy == 0 && dx == 0) return;
 			if (!piece.Promoted && piece.Color is White && dy == 0 && dx == 0) return;
 			(int X, int Y) target = (piece.X + dx, piece.Y + dy);
