@@ -92,7 +92,6 @@ void RenderGameStateWrapper(Game game)
 // RenderGameState() updates the board and displays the undo prompt.
 // Console.ReadKey(true); waits for player confirmation to prevent the UI from refreshing too quickly.
 
-
 //runs until a player wins and not null
 void RunGameLoop(Game game)
 {
@@ -171,20 +170,23 @@ void RunGameLoop(Game game)
 		{
 			List<Move> moves = game.Board.GetPossibleMoves(game.Turn);
 
-			// allow player to press F in AI turn before AI move
-            Console.WriteLine("Press [F] switch to your turn in 3 sec...");
-            DateTime startTime = DateTime.Now;
-            while ((DateTime.Now - startTime).TotalSeconds < 3) // 3 sec for player to press F
+			// only when there is remaining switch chance, will offer player 3 sec to press F
+            if (opponent.CanSwitchTurn()) 
             {
-                if (Console.KeyAvailable)
+                Console.WriteLine("Press [F] switch to your turn...");
+                DateTime startTime = DateTime.Now;
+                while ((DateTime.Now - startTime).TotalSeconds < 3) // 3 sec
                 {
-                    ConsoleKey key = Console.ReadKey(true).Key;
-                    if (key == ConsoleKey.F && opponent.CanSwitchTurn())
+                    if (Console.KeyAvailable)
                     {
-                        opponent.UseSwitchTurn();
-                        game.Turn = opponent.Color;
-                        Console.WriteLine($"Player {opponent.Color} Forced to Switch！");
-                        break;
+                        ConsoleKey key = Console.ReadKey(true).Key;
+                        if (key == ConsoleKey.F && opponent.CanSwitchTurn()) // check if the player still can switch
+                        {
+                            opponent.UseSwitchTurn();
+                            game.Turn = opponent.Color; // switch at once
+                            Console.WriteLine($"Player {opponent.Color} Switch the Turn！");
+                            break;
+                        }
                     }
                 }
             }
