@@ -1,4 +1,6 @@
 ﻿//RequirementA-4: Pieces can move in all 8 directions
+//RequirementA-5: Player can undo a move (Maybe have only 3 undos per game)
+//RequirementA-6: Player can have an extra turn to use at any point in the game
 //RequirementB-4: Stamina System
 
 using System.Threading;
