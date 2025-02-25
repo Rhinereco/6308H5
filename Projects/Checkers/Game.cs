@@ -43,6 +43,7 @@ public class Game
 		if (move.PieceToCapture is not null)
 		{
 			Board.Pieces.Remove(move.PieceToCapture);
+			 moveHistory.Pop(); //cannot undo the capture move
 		}
 		if (move.PieceToCapture is not null &&
 			Board.GetPossibleMoves(move.PieceToMove).Any(m => m.PieceToCapture is not null))
@@ -62,9 +63,41 @@ public class Game
 		// call the render method
 		renderCallback(this);
 
-		Console.ReadKey(true); // wait for player pressing Enter
+    	Console.WriteLine("Want to undo the last step? Press [D] to undo. Press [Enter] to continue...");
+
+		if (currentPlayer.CanUndo())
+		{
+			ConsoleKey key = Console.ReadKey(true).Key;
+			if (key == ConsoleKey.D)
+			{
+				UndoMove();
+				return;
+			}
+		}
+		//Console.ReadKey(true); 
+		// wait for player pressing Enter
 
 		CheckForWinner();
+	}
+
+	public void UndoMove()
+	{
+		if (moveHistory.Count == 0) return;
+
+		Move lastMove = moveHistory.Pop();
+		lastMove.PieceToMove.X = lastMove.To.X;
+		lastMove.PieceToMove.Y = lastMove.To.Y;
+
+		if (lastMove.PieceToCapture != null)
+		{
+			Board.Pieces.Add(lastMove.PieceToCapture);
+		}
+
+		Player currentPlayer = Players.First(p => p.Color == Turn);
+		currentPlayer.UseUndo(); // use 1 undo chance
+
+		Turn = Turn is Black ? White : Black; // back to gameplay next turn after undo the action
+		renderCallback(this);
 	}
 
 	public void CheckForWinner()
