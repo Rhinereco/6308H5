@@ -87,6 +87,11 @@ void RenderGameStateWrapper(Game game)
     RenderGameState(game, playerMoved: null, promptPressKey: false);
 }
 
+//=================================================A5 + A6=======================================================
+// PerformMove() processes the player's move (which may trigger UndoMove()).
+// RenderGameState() updates the board and displays the undo prompt.
+// Console.ReadKey(true); waits for player confirmation to prevent the UI from refreshing too quickly.
+
 
 //runs until a player wins and not null
 void RunGameLoop(Game game)
@@ -96,6 +101,7 @@ void RunGameLoop(Game game)
 		//get current player's turn
 		//switch to the current player
 		Player currentPlayer = game.Players.First(player => player.Color == game.Turn);
+		Player opponent = game.Players.First(player => player.Color != game.Turn); // get the opponent
 
 		//Ensure that Stamina is restored to 1 at the beginning of each player's turn
 		currentPlayer.step_count = 1;
@@ -160,24 +166,47 @@ void RunGameLoop(Game game)
 				}
 			}
 		}
-		//handle CPU turn
+		//handle AI turn
 		else
 		{
 			List<Move> moves = game.Board.GetPossibleMoves(game.Turn);
-			List<Move> captures = moves.Where(move => move.PieceToCapture is not null).ToList();
-			if (captures.Count > 0)//Prioritizes capturing moves
+
+			// allow player to press F in AI turn before AI move
+            Console.WriteLine("Press [F] switch to your turn in 3 sec...");
+            DateTime startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalSeconds < 3) // 3 sec for player to press F
+            {
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKey key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.F && opponent.CanSwitchTurn())
+                    {
+                        opponent.UseSwitchTurn();
+                        game.Turn = opponent.Color;
+                        Console.WriteLine($"Player {opponent.Color} Forced to Switch！");
+                        break;
+                    }
+                }
+            }
+
+            // if no F press, AI move
+			if (game.Turn == currentPlayer.Color) 
 			{
-				game.PerformMove(captures[Random.Shared.Next(captures.Count)]);
-			}
-			else if(!game.Board.Pieces.Any(piece => piece.Color == game.Turn && !piece.Promoted))//moves towards the closest rival
-			{
-				var (a, b) = game.Board.GetClosestRivalPieces(game.Turn);
-				Move? priorityMove = moves.FirstOrDefault(move => move.PieceToMove == a && Board.IsTowards(move, b));
-				game.PerformMove(priorityMove ?? moves[Random.Shared.Next(moves.Count)]);
-			}
-			else//or just selects a random move
-			{
-				game.PerformMove(moves[Random.Shared.Next(moves.Count)]);
+				List<Move> captures = moves.Where(move => move.PieceToCapture is not null).ToList();
+				if (captures.Count > 0) // capture first
+				{
+					game.PerformMove(captures[Random.Shared.Next(captures.Count)]);
+				}
+				else if (!game.Board.Pieces.Any(piece => piece.Color == game.Turn && !piece.Promoted)) // move promoted
+				{
+					var (a, b) = game.Board.GetClosestRivalPieces(game.Turn);
+					Move? priorityMove = moves.FirstOrDefault(move => move.PieceToMove == a && Board.IsTowards(move, b));
+					game.PerformMove(priorityMove ?? moves[Random.Shared.Next(moves.Count)]);
+				}
+				else // move randomly
+				{
+					game.PerformMove(moves[Random.Shared.Next(moves.Count)]);
+				}
 			}
 		}
 
@@ -188,6 +217,7 @@ void RunGameLoop(Game game)
 		
 	}
 }
+//=================================================A5 + A6=======================================================
 
 void RenderGameState(Game game, Player? playerMoved = null, (int X, int Y)? selection = null, (int X, int Y)? from = null, bool promptPressKey = false)
 {
