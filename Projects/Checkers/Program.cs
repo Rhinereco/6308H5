@@ -149,7 +149,7 @@ void RunGameLoop(Game game)
 					if (move is not null &&
 						(game.Board.Aggressor is null || move.PieceToMove == game.Board.Aggressor))
 					{
-						game.PerformMove(move);
+						game.PerformMove(move);// when PerformMove triggered，add Undo notice
 					}
 				}
 			}
@@ -176,7 +176,10 @@ void RunGameLoop(Game game)
 		}
 
 		RenderGameState(game, playerMoved: currentPlayer, promptPressKey: true);
+		// Since PerformMove may trigger UndoMove and revert the last move,
+		// still need Console.ReadKey(true) to wait for player input.
 		Console.ReadKey(true);
+		
 	}
 }
 
