@@ -63,7 +63,8 @@ public class Game
 		// call the render method
 		renderCallback(this);
 
-    	Console.WriteLine("Want to undo the last step? Press [D] to undo. Press [Enter] to continue...");
+    	Console.WriteLine("  Want to undo the last step? ");
+		Console.WriteLine("  Press [D] to undo. Press [Enter] to continue...");
 
 		if (currentPlayer.CanUndo())
 		{
@@ -80,26 +81,36 @@ public class Game
 		CheckForWinner();
 	}
 
+	// ======================================A5:Undo===================================================
+    // After undoing a move, the piece will correctly return to its original position.  
+	// If the move was a capture, undo is not allowed.  
+	// The undo count decreases, with a maximum of 3 undos per game.  
 	public void UndoMove()
 	{
 		if (moveHistory.Count == 0) return;
 
 		Move lastMove = moveHistory.Pop();
-		lastMove.PieceToMove.X = lastMove.To.X;
-		lastMove.PieceToMove.Y = lastMove.To.Y;
+
+		// lastMove.PieceToMove.X = lastMove.To.X;
+		// lastMove.PieceToMove.Y = lastMove.To.Y;
+		//make the piece back to the previous place
+		lastMove.PieceToMove.X = lastMove.PieceToMove.X - (lastMove.To.X - lastMove.PieceToMove.X);  
+    	lastMove.PieceToMove.Y = lastMove.PieceToMove.Y - (lastMove.To.Y - lastMove.PieceToMove.Y);  
 
 		if (lastMove.PieceToCapture != null)
 		{
 			Board.Pieces.Add(lastMove.PieceToCapture);
 		}
 
+		//switch turn, reduce chance by 1
 		Player currentPlayer = Players.First(p => p.Color == Turn);
-		currentPlayer.UseUndo(); // use 1 undo chance
+		currentPlayer.UseUndo(); // decrease player's remaining undo count
 
 		Turn = Turn is Black ? White : Black; // back to gameplay next turn after undo the action
 		renderCallback(this);
 	}
-
+	// ======================================A5:Undo===================================================
+	
 	public void CheckForWinner()
 	{
 		if (!Board.Pieces.Any(piece => piece.Color is Black))
