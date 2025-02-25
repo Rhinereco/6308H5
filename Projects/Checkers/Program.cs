@@ -150,6 +150,12 @@ void RunGameLoop(Game game)
 						(game.Board.Aggressor is null || move.PieceToMove == game.Board.Aggressor))
 					{
 						game.PerformMove(move);// when PerformMove triggered，add Undo notice
+
+						// make sure player can still move after undo the last move
+						if (currentPlayer.step_count > 0)
+						{
+							continue; // back to the loop again, let the player keep moving
+						}
 					}
 				}
 			}

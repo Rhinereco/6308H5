@@ -34,7 +34,11 @@ public class Game
 
 	public void PerformMove(Move move)
 	{
-		(move.PieceToMove.X, move.PieceToMove.Y) = move.To;
+		moveHistory.Push(new Move(move.PieceToMove, (move.PieceToMove.X, 
+		move.PieceToMove.Y), move.PieceToCapture)); // take the movement
+
+    	(move.PieceToMove.X, move.PieceToMove.Y) = move.To;
+
 		if ((move.PieceToMove.Color is Black && move.To.Y is 7) ||
 			(move.PieceToMove.Color is White && move.To.Y is 0))
 		{
@@ -75,6 +79,12 @@ public class Game
 				return;
 			}
 		}
+
+		// make sure player can still move after undo the last move
+		if (currentPlayer.step_count == 0) 
+		{
+			currentPlayer.step_count = 1; // let player make another move again
+		}
 		//Console.ReadKey(true); 
 		// wait for player pressing Enter
 
@@ -82,9 +92,14 @@ public class Game
 	}
 
 	// ======================================A5:Undo===================================================
-    // After undoing a move, the piece will correctly return to its original position.  
-	// If the move was a capture, undo is not allowed.  
-	// The undo count decreases, with a maximum of 3 undos per game.  
+    // 1. Pressing D to undo will return the piece to its original position.
+	// 2. After undoing, the player can move again instead of ending the turn.
+	// 3. If the player does not undo, they must press Enter twice to confirm the move:
+	// 		- First Enter executes the move and displays the undo prompt.
+	// 		- Second Enter confirms the move.
+	// 4.If the player undoes the move, they must make a new move before confirming:
+	// 		- Pressing D to undo allows the player to reselect the starting and ending positions.
+	// 		- After making a new move, they press Enter once to confirm.
 	public void UndoMove()
 	{
 		if (moveHistory.Count == 0) return;
@@ -97,20 +112,21 @@ public class Game
 		lastMove.PieceToMove.X = lastMove.PieceToMove.X - (lastMove.To.X - lastMove.PieceToMove.X);  
     	lastMove.PieceToMove.Y = lastMove.PieceToMove.Y - (lastMove.To.Y - lastMove.PieceToMove.Y);  
 
+		//remake the captured piece if any
 		if (lastMove.PieceToCapture != null)
 		{
 			Board.Pieces.Add(lastMove.PieceToCapture);
 		}
 
-		//switch turn, reduce chance by 1
-		Player currentPlayer = Players.First(p => p.Color == Turn);
+		// ✅ 让当前玩家继续移动，而不是直接切换回合
+    	Player currentPlayer = Players.First(p => p.Color == Turn);
 		currentPlayer.UseUndo(); // decrease player's remaining undo count
 
-		Turn = Turn is Black ? White : Black; // back to gameplay next turn after undo the action
+		// Turn = Turn is Black ? White : Black; // back to gameplay next turn after undo the action
 		renderCallback(this);
 	}
 	// ======================================A5:Undo===================================================
-	
+
 	public void CheckForWinner()
 	{
 		if (!Board.Pieces.Any(piece => piece.Color is Black))
