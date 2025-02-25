@@ -28,6 +28,10 @@ public class Game
 		this.renderCallback = renderCallback;
 	}
 
+	//========================================A-5:undo a move====================================
+	private Stack<Move> moveHistory = new(); // take player's history of action
+	//========================================A-5:undo a move====================================
+
 	public void PerformMove(Move move)
 	{
 		(move.PieceToMove.X, move.PieceToMove.Y) = move.To;
