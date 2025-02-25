@@ -106,11 +106,11 @@ public class Game
 
 		Move lastMove = moveHistory.Pop();
 
-		// lastMove.PieceToMove.X = lastMove.To.X;
-		// lastMove.PieceToMove.Y = lastMove.To.Y;
+		lastMove.PieceToMove.X = lastMove.To.X;
+		lastMove.PieceToMove.Y = lastMove.To.Y;
 		//make the piece back to the previous place
-		lastMove.PieceToMove.X = lastMove.PieceToMove.X - (lastMove.To.X - lastMove.PieceToMove.X);  
-    	lastMove.PieceToMove.Y = lastMove.PieceToMove.Y - (lastMove.To.Y - lastMove.PieceToMove.Y);  
+		//lastMove.PieceToMove.X = lastMove.PieceToMove.X - (lastMove.To.X - lastMove.PieceToMove.X);  
+    	//lastMove.PieceToMove.Y = lastMove.PieceToMove.Y - (lastMove.To.Y - lastMove.PieceToMove.Y);  
 
 		//remake the captured piece if any
 		if (lastMove.PieceToCapture != null)
