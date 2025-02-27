@@ -1,7 +1,27 @@
 ﻿//RequirementA-4: Pieces can move in all 8 directions
-//RequirementA-5: Player can undo a move (Maybe have only 3 undos per game)
-//RequirementA-6: Player can have an extra turn to use at any point in the game
-//RequirementB-4: Stamina System
+// •	The Board class defines movement logic in GetPossibleMoves(Piece piece), allowing movement 
+// 		in eight directions ((-1,-1), (-1,1), (1,-1), (1,1), (0,1), (0,-1), (1,0), (-1,0)).
+// •	The function ValidateDiagonalMove(int dx, int dy) determines whether a move is valid for the 
+// 		given piece, ensuring movement in all possible directions (Board.cs).
+// RequirementA-5: Player can undo a move (Maybe have only 3 undos per game)
+// •	The Game class maintains a stack-based history (moveHistory) of moves to allow undo (Game.cs).
+// •	PerformMove(Move move) records each move in moveHistory before execution.
+// •	UndoMove() retrieves and reverts the last move except for capture moves, which cannot be undone.
+// •	Player class defines undo_count = 3, limiting undos per player (Player.cs).
+// •	Players press [D] to undo; if all undo chances are used, undo is no longer available.
+// RequirementA-6: Player can have an extra turn to use at any point in the game
+// •	The Player class tracks whether a player has used the extra turn (switchTurnUsed = false).
+// •	During the opponent's turn, the player can press [F] to instantly switch the turn to themselves.
+// •	CanSwitchTurn() ensures that this action can only be used once per game (Player.cs).
+// •	RunGameLoop() in Program.cs checks for [F] key input during the opponent's move, and if pressed, 
+// 		it switches turns (game.Turn = opponent.Color).
+// RequirementB-4: Stamina System
+// •	Each player starts their turn with step_count = 1 (Player (1).cs).
+// •	After a move, step_count is reduced to 0, forcing a turn switch (PerformMove() in Game.cs).
+// •	In RunGameLoop() (Program.cs), if step_count reaches 0, the turn automatically switches.
+// •	This ensures that each player can only make one move per turn unless special rules (e.g., captures) 
+// 		allow otherwise.
+
 
 using System.Threading;
 
